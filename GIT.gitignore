@@ -1,0 +1,2 @@
+echo solar_power_model.joblib >> .gitignore
+echo scaler.joblib >> .gitignore
