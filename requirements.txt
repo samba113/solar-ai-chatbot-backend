@@ -5,6 +5,7 @@ numpy
 joblib
 gdown
 python-multipart
+xgboost
 
 
 
