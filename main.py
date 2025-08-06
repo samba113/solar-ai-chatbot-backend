@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Enable CORS for React (localhost:3000)
+# Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,14 +18,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Google Drive URLs formatted for direct download
+# Google Drive direct download links
 MODEL_URL = "https://drive.google.com/uc?id=1YTbH3EvF_O0z5ncilUSHtyhSkJdit5Rn"
 SCALER_URL = "https://drive.google.com/uc?id=1IFwtBf7fkf0Gr9ZUzLFdYQuMQS4gMI1h"
 
 MODEL_PATH = "solar_power_model.joblib"
 SCALER_PATH = "scaler.joblib"
 
-# auto‑download if not already present
+# Download model and scaler if not exist
 if not os.path.exists(MODEL_PATH):
     gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
 
@@ -41,7 +41,6 @@ class Payload(BaseModel):
 @app.post("/predict")
 async def predict(payload: Payload):
     text = payload.message.lower()
-    # extract the four values
     try:
         temp = float(re.search(r"(\d+(?:\.\d+)?)\s*°?c", text).group(1))
         hum = float(re.search(r"(\d+(?:\.\d+)?)\s*% humidity", text).group(1))
@@ -55,3 +54,8 @@ async def predict(payload: Payload):
     pred = model.predict(arr_scaled)[0]
     pred = max(0, float(pred))
     return {"prediction": round(pred, 2)}
+
+# ✅ Add this route for health check
+@app.get("/")
+def read_root():
+    return {"message": "Solar Power Prediction API is running"}
